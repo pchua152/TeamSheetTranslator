@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 path_to_tesseract = os.getenv('TessURL')
 
-image = os.getenv('image6')
+image = os.getenv('image2')
 
 
 pytesseract.pytesseract.tesseract_cmd = path_to_tesseract
@@ -133,12 +133,8 @@ def translate_team():
         cv.putText(img, mon_names[i], (x1, midpoint), font,  1, (255,255,255), 1)
         cv.putText(img,mon_abilities[i], (x1,ability_midpoint), font, .85, (255,255,255), 1)
     
-    cv.imshow("Translated Image", img)
     
-            
-    
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    cv.imwrite('Translated_Image.jpg', img)
     
     
 
