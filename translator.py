@@ -1,7 +1,8 @@
 import cv2 as cv
 import numpy as np
 import pytesseract
-import abilities as abilities
+import abilities
+import items
 import mons
 import moves
 import os
@@ -11,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 path_to_tesseract = os.getenv('TessURL')
 
-image = os.getenv('image2')
+image = os.getenv('image3')
 
 
 pytesseract.pytesseract.tesseract_cmd = path_to_tesseract
@@ -35,80 +36,41 @@ def translate_team():
     
     mon_names = []
     mon_abilities = []
-    mon_moves = []
-    
-    #y,x
-    #Everything has a fixed point
-    mon_name_1 = img1[110:150, 45:245]
-    mon_ability_1 = img1[180:220, 45:245]
-
-    mon_name_2 = img1[110:150, 650:850]
-    mon_ability_2 = img1[180:220, 650:850]
-   
-
-    mon_name_3 = img1[280:330, 40:230]
-    mon_ability_3 = img1[360:400, 40:230]
- 
- 
-    mon_name_4 = img1[280:330, 650:850]
-    mon_ability_4 = img1[360:400, 650:850]
-  
-    mon_name_5 = img1[460:510, 40:230]
-    mon_ability_5 = img1[545:585, 40:230]
-
-    mon_name_6 = img1[470:510, 650:850]
-    mon_ability_6 = img1[545:585, 650:850]
-
-    
-    name = pytesseract.image_to_string(mon_name_1, lang= "jpn").strip()
-    text  = closest_pokemon_name(name)
-
-    mon_names.append(text)
-    
-    ability = pytesseract.image_to_string(mon_ability_1, lang="jpn").strip()
-    mon_abilities.append(closest_ability(ability))
-    
-    name = pytesseract.image_to_string(mon_name_2, lang= "jpn").strip()
-    mon_names.append(closest_pokemon_name(name))
-    
-    ability = pytesseract.image_to_string(mon_ability_2, lang="jpn").strip()
-    mon_abilities.append(closest_ability(ability))
-    
-    name = pytesseract.image_to_string(mon_name_3, lang= "jpn").strip()
-    mon_names.append(closest_pokemon_name(name))
-    
-    ability = pytesseract.image_to_string(mon_ability_3, lang="jpn").strip()
-    mon_abilities.append(closest_ability(ability))
-    
-    name = pytesseract.image_to_string(mon_name_4, lang= "jpn").strip()
-    mon_names.append(closest_pokemon_name(name))
-    
-    ability = pytesseract.image_to_string(mon_ability_4, lang="jpn").strip()
-    mon_abilities.append(closest_ability(ability))
-    
-
-    name = pytesseract.image_to_string(mon_name_5, lang= "jpn").strip()
-    mon_names.append(closest_pokemon_name(name))
-    
-    
-    name = pytesseract.image_to_string(mon_name_6, lang= "jpn").strip()
-    mon_names.append(closest_pokemon_name(name))
- 
-    
-    ability = pytesseract.image_to_string(mon_ability_5, lang="jpn").strip()
-    mon_abilities.append(closest_ability(ability))
-    
-    
-    ability = pytesseract.image_to_string(mon_ability_6, lang="jpn").strip()
-    mon_abilities.append(closest_ability(ability))
 
     blue_color = (116,85,36)
     font = cv.FONT_HERSHEY_SIMPLEX
     
-    name_locations = [(53,110, 240, 150), (660, 110, 808, 150), (53, 290, 240, 330), (660,290, 808,330), (53,470, 240, 510), (660, 470, 808, 510)]
+    name_locations = [(45,110, 245, 150), (650, 110, 850, 150), (40, 280, 230, 330), (650,280, 850,330), (40,460, 230, 510), (650, 470, 850, 510)]
     ability_locations = [(53,180, 240,220) , (660,180, 835, 220), (53,360,240,400), (660, 360, 835, 400), (53, 540, 240, 580), (660, 540, 835, 580)]
-    #A rental might not have 6 in the picture
-    total_mons = len(mon_names)
+
+    for x1,y1, x2,y2 in name_locations:
+        midpoint = (y1+y2) // 2
+        name = img1[y1:y2, x1:x2]
+        image_read = pytesseract.image_to_string(name, lang= "jpn")
+        cv.rectangle(img, (x1,y1) , (x2,y2), blue_color, -1)
+        translated_text = closest_pokemon_name(image_read)
+        cv.putText(img, translated_text, (x1, midpoint), font, 1, (255,255,255), 1)
+
+    
+    for x1,y1,x2,y2 in ability_locations:
+        midpoint = (y1+ y2) // 2
+        ability = img1[y1:y2, x1:x2]
+        image_read = pytesseract.image_to_string(ability, lang= "jpn")
+        cv.rectangle(img, (x1,y1), (x2,y2), blue_color, -1)
+        translated_text = closest_ability(image_read)
+        cv.putText(img, translated_text, (x1,midpoint), font, .85, (255,255,255), 1)
+    
+    item_y_regions = [(220,260), (400,440), (580,620)]
+    item_x_regions = [(90,260), (695,865)]
+    
+    for x1,x2 in item_x_regions:
+        for y1,y2 in item_y_regions:
+            item = img1[y1:y2, x1:x2]
+            midpoint = (y1+ y2) // 2
+            image_read = pytesseract.image_to_string(item,lang= "jpn")
+            cv.rectangle(img, (x1,y1), (x2,y2), blue_color, -1)
+            translated_text = closest_item(image_read)
+            cv.putText(img, translated_text, (x1, midpoint), font, .75, (255,255,255), 1)
     
     
     move_y_regions = [[(100,141), (141,182), (182,223), (223,265)],  [(290,325) , (325, 362), (362,403), (403,445)], [(465,506), (506,547), (547,578), (578, 620)]]
@@ -120,21 +82,11 @@ def translate_team():
                 midpoint = (y1 + y2) // 2
                 image_read = pytesseract.image_to_string(move, lang="jpn")
                 cv.rectangle(img, (x1,y1), (x2,y2), blue_color, -1)
-                add_this = closest_move(image_read)
-                cv.putText(img, add_this, (x1, midpoint), font, .5 ,(255,255,255), 1)
-    
-    for i in range(total_mons):
-        x1,y1,x2,y2 = name_locations[i]
-        ax1,ay1,ax2,ay2 = ability_locations[i]
-        ability_midpoint = (ay1 + ay2) // 2
-        midpoint = (y1+y2)//2
-        cv.rectangle(img,(x1,y1), (x2,y2) , blue_color, -1)
-        cv.rectangle(img, (ax1, ay1), (ax2,ay2), blue_color, -1)
-        cv.putText(img, mon_names[i], (x1, midpoint), font,  1, (255,255,255), 1)
-        cv.putText(img,mon_abilities[i], (x1,ability_midpoint), font, .85, (255,255,255), 1)
-    
+                translated_text = closest_move(image_read)
+                cv.putText(img, translated_text, (x1, midpoint), font, .5 ,(255,255,255), 1)
     
     cv.imwrite('Translated_Image.jpg', img)
+    print('Translated image, check file named Translated_Image.jpg')
     
     
 
@@ -189,6 +141,22 @@ def closest_pokemon_name(text):
                 max = fuzz_ratio
                 value = mons.mons[key]
         return value
+
+def closest_item(text):
+    if text == "" or text == "なし":
+        return "None"
+    if text in items.items:
+        return items.items[text]
+    else:
+        max = 0
+        value = ""
+        for key in items.items:
+            fuzz_ratio = fuzz.ratio(ascii(text), ascii(key))
+            if fuzz_ratio > max:
+                max = fuzz_ratio
+                value = items.items[key]
+        return value
+    
 
 
 if __name__ == "__main__":
