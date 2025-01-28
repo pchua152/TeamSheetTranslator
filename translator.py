@@ -1,5 +1,4 @@
 import cv2 as cv
-import numpy as np
 import pytesseract
 import abilities
 import items
@@ -17,6 +16,15 @@ image = os.getenv('image3')
 
 pytesseract.pytesseract.tesseract_cmd = path_to_tesseract
 def translate_team():
+    blue_color = (116,85,36)
+    font = cv.FONT_HERSHEY_SIMPLEX
+    name_locations = [(45,110, 245, 150), (650, 110, 850, 150), (40, 280, 230, 330), (650,280, 850,330), (40,460, 230, 510), (650, 470, 850, 510)]
+    ability_locations = [(53,180, 240,220) , (660,180, 835, 220), (53,360,240,400), (660, 360, 835, 400), (53, 540, 240, 580), (660, 540, 835, 580)]
+    item_y_regions = [(220,260), (400,440), (580,620)]
+    item_x_regions = [(90,260), (695,865)]
+    move_y_regions = [[(100,141), (141,182), (182,223), (223,265)],  [(290,325) , (325, 362), (362,403), (403,445)], [(465,506), (506,547), (547,578), (578, 620)]]
+    move_x_regions = [(390,620), (1000,1235)]
+    
     
     img = cv.imread(image)
     img = img.copy()
@@ -33,16 +41,10 @@ def translate_team():
     ret, thresh1 = cv.threshold(gray,0,255, cv.THRESH_OTSU | cv.THRESH_BINARY_INV)
     
     img1 = thresh1
-    
-    mon_names = []
-    mon_abilities = []
 
-    blue_color = (116,85,36)
-    font = cv.FONT_HERSHEY_SIMPLEX
     
-    name_locations = [(45,110, 245, 150), (650, 110, 850, 150), (40, 280, 230, 330), (650,280, 850,330), (40,460, 230, 510), (650, 470, 850, 510)]
-    ability_locations = [(53,180, 240,220) , (660,180, 835, 220), (53,360,240,400), (660, 360, 835, 400), (53, 540, 240, 580), (660, 540, 835, 580)]
-
+    
+    
     for x1,y1, x2,y2 in name_locations:
         midpoint = (y1+y2) // 2
         name = img1[y1:y2, x1:x2]
@@ -60,9 +62,6 @@ def translate_team():
         translated_text = closest_ability(image_read)
         cv.putText(img, translated_text, (x1,midpoint), font, .85, (255,255,255), 1)
     
-    item_y_regions = [(220,260), (400,440), (580,620)]
-    item_x_regions = [(90,260), (695,865)]
-    
     for x1,x2 in item_x_regions:
         for y1,y2 in item_y_regions:
             item = img1[y1:y2, x1:x2]
@@ -72,9 +71,6 @@ def translate_team():
             translated_text = closest_item(image_read)
             cv.putText(img, translated_text, (x1, midpoint), font, .75, (255,255,255), 1)
     
-    
-    move_y_regions = [[(100,141), (141,182), (182,223), (223,265)],  [(290,325) , (325, 362), (362,403), (403,445)], [(465,506), (506,547), (547,578), (578, 620)]]
-    move_x_regions = [(390,620), (1000,1235)]
     for x1, x2 in move_x_regions:
         for y in move_y_regions:
             for y1,y2 in y:
@@ -119,7 +115,6 @@ def closest_ability(text):
         value = ""
         ascii_text = ascii(text)
         for key in abilities.abilities:
-            #Fuzz ratio the ascii to compare the Japanese text
             fuzz_ratio = fuzz.ratio(ascii_text, ascii(key))
             if fuzz_ratio > max:
                 max = fuzz_ratio
