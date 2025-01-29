@@ -4,15 +4,14 @@ This project takes in an image of a rental team from Pokemon Scarlet and Violet 
 ## Getting Started
 Before running, there are a few dependencies you will need to download.
 Use the following commands to install the necessary libraries:
-  `pip install opencv-python`
-  `pip install pytesseract`
-  `pip install thefuzz`
+
+`pip install opencv-python pytesseract thefuzz`
 
 With the following libraries installed, you will also need to download [Tesseract OCR](https://tesseract-ocr.github.io/tessdoc/Downloads.html). **Be sure to download the other language packs, specifically Japanese, for this to work properly**.
 
 In the translator.py file, edit the following lines to the correct values:
-  `image = path to your image here`
-  `pytesseract.pytesseract.tesseract_cmd = path_to_tesseract`
+  * `image = path_to_your_image_here`
+  * `pytesseract.pytesseract.tesseract_cmd = path_to_tesseract`
 
 Make sure the image you are using is **1280 x 720**. This can easily be done by taking a screenshot on your Switch and then transfering the photo to your smart phone. 
 
