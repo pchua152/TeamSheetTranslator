@@ -1,17 +1,16 @@
 import cv2 as cv
 import pytesseract
-import abilities
-import items
-import mons
-import moves
+from abilities import abilities as abilities
+from items import items as items
+from mons import mons as mons
+from moves import moves as moves
 import os
 from thefuzz import fuzz
 from dotenv import load_dotenv
-
 load_dotenv()
 path_to_tesseract = os.getenv('TessURL')
 
-image = os.getenv('image3')
+image = os.getenv('image2')
 
 
 pytesseract.pytesseract.tesseract_cmd = path_to_tesseract
@@ -19,7 +18,7 @@ def translate_team():
     blue_color = (116,85,36)
     font = cv.FONT_HERSHEY_SIMPLEX
     name_locations = [(45,110, 245, 150), (650, 110, 850, 150), (40, 280, 230, 330), (650,280, 850,330), (40,460, 230, 510), (650, 470, 850, 510)]
-    ability_locations = [(53,180, 240,220) , (660,180, 835, 220), (53,360,240,400), (660, 360, 835, 400), (53, 540, 240, 580), (660, 540, 835, 580)]
+    ability_locations = [(45,180, 240,220) , (660,180, 835, 220), (45,360,240,400), (660, 360, 835, 400), (45, 540, 240, 580), (660, 540, 835, 580)]
     item_y_regions = [(220,260), (400,440), (580,620)]
     item_x_regions = [(90,260), (695,865)]
     move_y_regions = [[(100,141), (141,182), (182,223), (223,265)],  [(290,325) , (325, 362), (362,403), (403,445)], [(465,506), (506,547), (547,578), (578, 620)]]
@@ -41,9 +40,6 @@ def translate_team():
     ret, thresh1 = cv.threshold(gray,0,255, cv.THRESH_OTSU | cv.THRESH_BINARY_INV)
     
     img1 = thresh1
-
-    
-    
     
     for x1,y1, x2,y2 in name_locations:
         midpoint = (y1+y2) // 2
@@ -84,73 +80,36 @@ def translate_team():
     cv.imwrite('Translated_Image.jpg', img)
     print('Translated image, check file named Translated_Image.jpg')
     
-    
-
-#Failsafes included for when error happens in image reading
-def closest_move(text):
-    #it can be possible a pokemon does not have 4 moves
+def closest_match(text, dictionary):
     if text == "":
         return
-    if text in moves.moves:
-        return moves.moves[text]
+    if text in dictionary:
+        return dictionary[text]
     else:
         max = 0
         value = ""
         ascii_text = ascii(text)
-        for key in moves.moves:
+        for key in dictionary:
             #Fuzz ratio the ascii to compare the Japanese text
             fuzz_ratio = fuzz.ratio(ascii_text, ascii(key))
             if fuzz_ratio > max:
                 max = fuzz_ratio
-                value = moves.moves[key]
+                value = dictionary[key]
         return value
+
+def closest_move(text):
+    return closest_match(text, moves)
 
 def closest_ability(text):
-    if text == " ":
-        return
-    if text in abilities.abilities:
-        return abilities.abilities[text]
-    else:
-        max = 0
-        value = ""
-        ascii_text = ascii(text)
-        for key in abilities.abilities:
-            fuzz_ratio = fuzz.ratio(ascii_text, ascii(key))
-            if fuzz_ratio > max:
-                max = fuzz_ratio
-                value = abilities.abilities[key]
-        return value
+    return closest_match(text, abilities)
 
 def closest_pokemon_name(text):
-    if text == "":
-        return 
-    if text in mons.mons:
-        return mons.mons[text]
-    
-    else:
-        max = 0
-        value = ""
-        for key in mons.mons:
-            fuzz_ratio = fuzz.ratio(ascii(text), ascii(key))
-            if fuzz_ratio > max:
-                max = fuzz_ratio
-                value = mons.mons[key]
-        return value
+    return closest_match(text, mons)
 
 def closest_item(text):
-    if text == "" or text == "なし":
+    if text == "なし":
         return "None"
-    if text in items.items:
-        return items.items[text]
-    else:
-        max = 0
-        value = ""
-        for key in items.items:
-            fuzz_ratio = fuzz.ratio(ascii(text), ascii(key))
-            if fuzz_ratio > max:
-                max = fuzz_ratio
-                value = items.items[key]
-        return value
+    return closest_match(text, items)
     
 
 
