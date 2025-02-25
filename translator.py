@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 path_to_tesseract = os.getenv('TessURL')
 
-image = os.getenv('image2')
+image = os.getenv('image8')
 
 
 pytesseract.pytesseract.tesseract_cmd = path_to_tesseract
@@ -22,7 +22,7 @@ def translate_team():
     item_y_regions = [(220,260), (400,440), (580,620)]
     item_x_regions = [(90,260), (695,865)]
     move_y_regions = [[(100,141), (141,182), (182,223), (223,265)],  [(290,325) , (325, 362), (362,403), (403,445)], [(465,506), (506,547), (547,578), (578, 620)]]
-    move_x_regions = [(390,620), (1000,1235)]
+    move_x_regions = [(390,570), (1005,1180)]
     
     
     img = cv.imread(image)
@@ -40,6 +40,7 @@ def translate_team():
     ret, thresh1 = cv.threshold(gray,0,255, cv.THRESH_OTSU | cv.THRESH_BINARY_INV)
     
     img1 = thresh1
+    
     
     for x1,y1, x2,y2 in name_locations:
         midpoint = (y1+y2) // 2
